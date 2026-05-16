@@ -1,9 +1,13 @@
+import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token
+from app.core.security import (
+    verify_password, create_access_token, create_refresh_token,
+    decode_token, blacklist_token,
+)
 from app.models.audit import AuditLog
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import LoginRequest, TokenResponse
@@ -53,7 +57,11 @@ class AuthService:
         if payload.get("type") != "refresh":
             raise ValueError("Token de refresco inválido")
 
-        import uuid
+        # Blacklist el refresh token usado para evitar reutilización
+        jti = payload.get("jti")
+        if jti:
+            blacklist_token(jti, payload["exp"])
+
         user = self.user_repo.get_by_id(uuid.UUID(payload["sub"]))
         if not user or not user.is_active:
             raise ValueError("Usuario no encontrado o inactivo")
@@ -65,6 +73,15 @@ class AuthService:
             refresh_token=new_refresh,
             expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         )
+
+    def logout(self, access_token: str) -> None:
+        try:
+            payload = decode_token(access_token)
+            jti = payload.get("jti")
+            if jti:
+                blacklist_token(jti, payload["exp"])
+        except ValueError:
+            pass
 
     def _write_audit(self, user_id, action, ip, user_agent, status, payload=None):
         log = AuditLog(

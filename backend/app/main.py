@@ -1,8 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+from app.core.security import decode_token, is_blacklisted
 from app.api.routes import background_routes, auth_routes
+
+PUBLIC_PATHS = {"/", "/health", "/api/docs", "/api/redoc", "/openapi.json"}
+PUBLIC_PREFIXES = ("/api/v1/auth/",)
 
 app = FastAPI(
     title="BanexReintegra API",
@@ -19,6 +24,37 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    path = request.url.path
+
+    # Solo proteger rutas /api/
+    if not path.startswith("/api/"):
+        return await call_next(request)
+
+    # Rutas públicas
+    if path in PUBLIC_PATHS or any(path.startswith(p) for p in PUBLIC_PREFIXES):
+        return await call_next(request)
+
+    # Validar Bearer token
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return JSONResponse(status_code=401, content={"detail": "No autenticado"})
+
+    token = auth_header.split(" ", 1)[1]
+    try:
+        payload = decode_token(token)
+        if payload.get("type") != "access":
+            raise ValueError
+        jti = payload.get("jti")
+        if jti and is_blacklisted(jti):
+            return JSONResponse(status_code=401, content={"detail": "Token revocado"})
+    except ValueError:
+        return JSONResponse(status_code=401, content={"detail": "Token inválido o expirado"})
+
+    return await call_next(request)
 
 
 @app.get("/", tags=["root"])
