@@ -16,6 +16,9 @@ __pycache__/
 frontend/.env
 backend/.env
 
+# Editor / virtualenv
+frontend/.venv/
+
 # Archivos cargados/exportados
 backend/uploads/
 backend/exports/
