@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from .api.routes import background_routes
 
 app = FastAPI(
     title="BanexReintegra API",
@@ -26,3 +27,6 @@ def health_check():
     return {
         "status": "ok"
     }
+
+# register routers
+app.include_router(background_routes.router, prefix="/background", tags=["background"])
