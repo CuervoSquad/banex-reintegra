@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
 
-from ...workers.example_worker import example_task
+from workers.example_worker import example_task
 
 router = APIRouter(prefix="/background", tags=["background"])
 

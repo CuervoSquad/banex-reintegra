@@ -1,20 +1,19 @@
-import time
-from rq import Queue, Connection, Worker
+import os
+from rq import Queue, Worker
 from redis import Redis
 
-from .example_worker import example_task
+from workers.example_worker import example_task
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 
 
-def enqueue_example(redis_url: str = "redis://localhost:6379/0", payload=None):
-    redis_conn = Redis.from_url(redis_url)
+def enqueue_example(payload=None):
+    redis_conn = Redis.from_url(REDIS_URL)
     q = Queue("default", connection=redis_conn)
-    job = q.enqueue(example_task, payload)
-    return job
+    return q.enqueue(example_task, payload)
 
 
 if __name__ == "__main__":
-    # Start a worker that listens to the 'default' queue
-    redis_conn = Redis()
-    with Connection(redis_conn):
-        worker = Worker(["default"])
-        worker.work()
+    redis_conn = Redis.from_url(REDIS_URL)
+    worker = Worker(["default"], connection=redis_conn)
+    worker.work()
