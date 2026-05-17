@@ -4,6 +4,9 @@ import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
 import StreamCashbackPage from '../pages/StreamCashbackPage';
+import UploadPage from '../pages/UploadPage';
+import LevelsPage from '../pages/LevelsPage';
+import ReportsPage from '../pages/ReportsPage';
 
 export default function AppRouter() {
   return (
@@ -15,6 +18,10 @@ export default function AppRouter() {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/stream-cashback" element={<StreamCashbackPage />} />
+            <Route path="/upload" element={<UploadPage />} />
+            <Route path="/levels" element={<LevelsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/reports/generate/:sessionId" element={<ReportsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
