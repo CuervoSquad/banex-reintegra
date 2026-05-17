@@ -141,6 +141,22 @@ export function sumPaymentsBs(payments: DemoQrPayment[]) {
   return payments.reduce((total, payment) => total + Number(payment.payment_amount), 0);
 }
 
+export function generateDemoPaymentsForAmount(targetBs: number): DemoQrPayment[] {
+  const payments: DemoQrPayment[] = [];
+  let total = 0;
+  while (total < targetBs) {
+    const p = demoPayments[Math.floor(Math.random() * demoPayments.length)];
+    const amount = Math.min(Number(p.payment_amount), targetBs - total);
+    payments.push({
+      id: `QR-DEMO-${Date.now()}-${payments.length}-${Math.floor(Math.random() * 9999)}`,
+      merchant_name: p.merchant_name,
+      payment_amount: amount.toFixed(2),
+    });
+    total += amount;
+  }
+  return payments;
+}
+
 export function calculateStreamSnapshot(stream: CashbackStream | null, now: number) {
   const startsAt = stream ? new Date(stream.starts_at).getTime() : now;
   const endsAt = stream ? new Date(stream.ends_at).getTime() : now + 1000;

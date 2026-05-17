@@ -8,6 +8,7 @@ import {
   calculateStreamSnapshot,
   cashbackLevels,
   formatBobCurrency,
+  generateDemoPaymentsForAmount,
   generateRandomQrPaymentsUntilTarget,
   getCashbackLevel,
   sumPaymentsBs,
@@ -23,7 +24,7 @@ export function useStreamCashback() {
   const [creatingQr, setCreatingQr] = useState(false);
   const [generatingMonth, setGeneratingMonth] = useState(false);
   const [selectedLevelId, setSelectedLevelId] = useState<CashbackLevelId>('level-2');
-  const [monthlyPayments, setMonthlyPayments] = useState<DemoQrPayment[]>([]);
+  const [monthlyPayments, setMonthlyPayments] = useState<DemoQrPayment[]>(() => generateDemoPaymentsForAmount(100000));
   const bootstrapped = useRef(false);
 
   useEffect(() => {
