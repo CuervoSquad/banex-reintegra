@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import ChatWidget from '../ChatWidget';
 
 export function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -12,5 +13,12 @@ export function ProtectedRoute() {
     );
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  return (
+    <>
+      <Outlet />
+      <ChatWidget />
+    </>
+  );
 }

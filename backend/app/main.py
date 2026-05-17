@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.security import decode_token, is_blacklisted
-from app.api.routes import background_routes, auth_routes, cashback_routes, level_routes, upload_routes, report_routes
+from app.api.routes import background_routes, auth_routes, cashback_routes, level_routes, upload_routes, report_routes, chat_routes
 
 PUBLIC_PATHS = {"/", "/health", "/api/docs", "/api/redoc", "/openapi.json"}
 PUBLIC_PREFIXES = ("/api/v1/auth/",)
@@ -28,6 +28,9 @@ app.add_middleware(
 
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
     path = request.url.path
     if not path.startswith("/api/"):
         return await call_next(request)
@@ -68,3 +71,4 @@ app.include_router(level_routes.router, prefix="/api/v1")
 app.include_router(upload_routes.router, prefix="/api/v1")
 app.include_router(report_routes.router, prefix="/api/v1")
 app.include_router(background_routes.router, prefix="/api/v1/background", tags=["background"])
+app.include_router(chat_routes.router, prefix="/api/v1")

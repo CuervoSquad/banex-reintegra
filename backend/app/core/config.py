@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     # CORS — string separado por comas, se parsea en main.py
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
 
+    # OpenRouter / IA
+    OPENROUTER_API_KEY: str = ""
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
