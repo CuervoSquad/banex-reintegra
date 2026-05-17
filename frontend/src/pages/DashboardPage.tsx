@@ -1,5 +1,4 @@
 import {
-  ArrowDown,
   ArrowUpRight,
   Bot,
   BriefcaseBusiness,
@@ -82,10 +81,6 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#0E0F19] text-white">
       <main className="mx-auto min-h-screen w-full max-w-[760px] px-4 pb-32 pt-0 sm:px-6">
         <header className="relative flex flex-col items-center text-center">
-          <div className="rounded-b-md bg-[#5346F6] px-4 py-1 text-xs text-white">
-            Visión estratégica 2026 &gt; 2030
-          </div>
-
           <button
             type="button"
             onClick={logout}
@@ -180,16 +175,6 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <div className="mt-4 flex justify-center">
-          <button
-            type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#161825] text-[#85889E]"
-          >
-            <ArrowDown className="h-5 w-5" />
-            <span className="sr-only">Bajar</span>
-          </button>
-        </div>
-
         <section className="mt-6">
           <h2 className="text-lg font-semibold text-white">North Star 2030</h2>
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
@@ -214,11 +199,7 @@ export default function DashboardPage() {
           </p>
         </section>
 
-        <section className="mt-6 grid gap-3 md:grid-cols-3">
-          <ActionButton label="Profundizar Stream" href="/stream-cashback" />
-          <ActionButton label="Go-to-market Protocolo" />
-          <ActionButton label="Pitch deck inversores" />
-        </section>
+
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[760px] px-4 pb-4 sm:px-6">
