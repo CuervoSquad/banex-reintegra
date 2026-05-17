@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.security import decode_token, is_blacklisted
-from app.api.routes import background_routes, auth_routes
+from app.api.routes import background_routes, auth_routes, cashback_routes
 
 PUBLIC_PATHS = {"/", "/health", "/api/docs", "/api/redoc", "/openapi.json"}
 PUBLIC_PREFIXES = ("/api/v1/auth/",)
@@ -63,4 +63,5 @@ def health_check():
 
 
 app.include_router(auth_routes.router, prefix="/api/v1")
+app.include_router(cashback_routes.router, prefix="/api/v1")
 app.include_router(background_routes.router, prefix="/api/v1/background", tags=["background"])

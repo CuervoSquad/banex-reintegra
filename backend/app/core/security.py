@@ -57,12 +57,18 @@ def decode_token(token: str) -> dict:
 
 
 def blacklist_token(jti: str, exp: int) -> None:
-    from app.db.redis_client import redis_client
-    ttl = exp - int(datetime.now(timezone.utc).timestamp())
-    if ttl > 0:
-        redis_client.setex(f"{BLACKLIST_PREFIX}{jti}", ttl, "1")
+    try:
+        from app.db.redis_client import redis_client
+        ttl = exp - int(datetime.now(timezone.utc).timestamp())
+        if ttl > 0:
+            redis_client.setex(f"{BLACKLIST_PREFIX}{jti}", ttl, "1")
+    except Exception:
+        pass
 
 
 def is_blacklisted(jti: str) -> bool:
-    from app.db.redis_client import redis_client
-    return redis_client.exists(f"{BLACKLIST_PREFIX}{jti}") == 1
+    try:
+        from app.db.redis_client import redis_client
+        return redis_client.exists(f"{BLACKLIST_PREFIX}{jti}") == 1
+    except Exception:
+        return False

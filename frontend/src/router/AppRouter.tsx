@@ -3,6 +3,7 @@ import { AuthProvider } from '../contexts/AuthContext';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
+import StreamCashbackPage from '../pages/StreamCashbackPage';
 
 export default function AppRouter() {
   return (
@@ -13,6 +14,7 @@ export default function AppRouter() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/stream-cashback" element={<StreamCashbackPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

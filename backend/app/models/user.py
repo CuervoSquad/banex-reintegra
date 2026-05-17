@@ -26,3 +26,7 @@ class User(Base):
 
     role: Mapped["Role"] = relationship("Role", back_populates="users")
     audit_logs: Mapped[list["AuditLog"]] = relationship("AuditLog", back_populates="user")
+    cashback_streams: Mapped[list["CashbackStream"]] = relationship(
+        "CashbackStream",
+        back_populates="user",
+    )
