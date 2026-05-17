@@ -26,7 +26,7 @@ export default function StreamCashbackScreen() {
     <ScrollView style={s.scroll} contentContainerStyle={s.container}>
       <View style={s.headerRow}>
         <TouchableOpacity style={s.backBtn} onPress={() => nav.goBack()}>
-          <Text style={s.backText}>← BANEX OS</Text>
+          <Text style={s.backText}>← BANEXCOIN</Text>
         </TouchableOpacity>
         <View style={s.liveTag}>
           <Text style={s.liveText}>● STREAM activo</Text>

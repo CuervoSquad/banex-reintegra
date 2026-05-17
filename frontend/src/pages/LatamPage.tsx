@@ -27,7 +27,7 @@ const paises = [
 
 const timeline = [
   { fecha: 'Q1 2024', hito: 'Bolivia live — 42K usuarios activos' },
-  { fecha: 'Q2 2025', hito: 'BANEX OS — protocolo B2B2C abierto' },
+  { fecha: 'Q2 2025', hito: 'BANEXCOIN — protocolo B2B2C abierto' },
   { fecha: 'Q3 2025', hito: 'Expansión Perú — partnership con Yape' },
   { fecha: 'Q4 2025', hito: 'Colombia — integración con Nequi' },
   { fecha: 'Q2 2026', hito: 'Argentina — mercado cripto-nativo' },

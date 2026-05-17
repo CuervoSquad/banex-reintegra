@@ -64,7 +64,7 @@ export default function UploadPage() {
       <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
         <header className="mb-6 flex items-center gap-4">
           <Link to="/dashboard" className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#161825] px-3 py-2 text-sm text-[#85889E] hover:text-white transition">
-            <ArrowLeft className="h-4 w-4" /> BANEX OS
+            <ArrowLeft className="h-4 w-4" /> BANEXCOIN
           </Link>
           <h1 className="text-xl font-semibold">Carga de transacciones QR</h1>
         </header>

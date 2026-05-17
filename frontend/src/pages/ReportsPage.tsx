@@ -45,7 +45,7 @@ export default function ReportsPage() {
       <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
         <header className="mb-6 flex items-center gap-4">
           <Link to="/dashboard" className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#161825] px-3 py-2 text-sm text-[#85889E] hover:text-white transition">
-            <ArrowLeft className="h-4 w-4" /> BANEX OS
+            <ArrowLeft className="h-4 w-4" /> BANEXCOIN
           </Link>
           <h1 className="text-xl font-semibold">Reportes de reintegros</h1>
           <Link to="/upload" className="ml-auto text-sm text-[#FF8C00] hover:underline">+ Nueva carga</Link>

@@ -7,7 +7,7 @@ from app.core.config import settings
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 SYSTEM_PROMPT = (
-    "Eres un asistente financiero experto en Banexcoin y el sistema BANEX OS. "
+    "Eres un asistente financiero experto en Banexcoin y el sistema BANEXCOIN. "
     "Ayudas con preguntas sobre cashback, reintegros, niveles de fidelidad, "
     "transacciones QR y la estrategia de expansión LATAM de Banexcoin. "
     "Responde siempre en español, de forma clara y concisa."

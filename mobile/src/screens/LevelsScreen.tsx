@@ -34,7 +34,7 @@ export default function LevelsScreen() {
     <ScrollView style={s.scroll} contentContainerStyle={s.container}>
       <View style={s.headerRow}>
         <TouchableOpacity style={s.backBtn} onPress={() => nav.goBack()}>
-          <Text style={s.backText}>← BANEX OS</Text>
+          <Text style={s.backText}>← BANEXCOIN</Text>
         </TouchableOpacity>
         <Text style={s.title}>Configuración de niveles</Text>
       </View>
