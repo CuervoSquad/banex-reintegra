@@ -49,21 +49,16 @@ const paths = [
 ];
 
 const bets = [
-  {
-    title: 'Stream',
-    text: 'Cashback en tiempo real, segundo a segundo',
-    icon: SlidersHorizontal,
-    href: '/stream-cashback',
-  },
-  { title: 'Adelanto', text: 'Cashback futuro como colateral', icon: Gem },
-  { title: 'Protocolo', text: 'Infraestructura B2B2C abierta', icon: Globe2 },
-  { title: 'Tesorería autónoma', text: 'Agente IA gestiona reservas 24/7', icon: Bot },
-  { title: 'BanexScore', text: 'Reputación financiera portable', icon: BriefcaseBusiness },
-  { title: 'ZK Privacidad', text: 'Pruebas sin revelar transacciones', icon: ShieldCheck },
-  { title: 'Agente boliviano', text: 'Soporte multimodal 24/7', icon: Search },
-  { title: 'Merchant economy', text: 'Tokens de comercio + marketplace', icon: Store },
-  { title: 'LATAM Protocol', text: 'Expansión cripto-nativa a 5 países', icon: Map },
-  { title: 'Wellness coach', text: 'Coach financiero IA gratis', icon: HeartPulse },
+  { title: 'Stream',             text: 'Cashback en tiempo real, segundo a segundo', icon: SlidersHorizontal, href: '/stream-cashback' },
+  { title: 'Adelanto',           text: 'Cashback futuro como colateral',             icon: Gem,               href: '/adelanto' },
+  { title: 'Protocolo',          text: 'Infraestructura B2B2C abierta',              icon: Globe2,            href: '/protocolo' },
+  { title: 'Tesorería autónoma', text: 'Agente IA gestiona reservas 24/7',           icon: Bot,               href: '/tesoreria' },
+  { title: 'BanexScore',         text: 'Reputación financiera portable',             icon: BriefcaseBusiness, href: '/banexscore' },
+  { title: 'ZK Privacidad',      text: 'Pruebas sin revelar transacciones',          icon: ShieldCheck,       href: '/zk-privacidad' },
+  { title: 'Agente boliviano',   text: 'Soporte multimodal 24/7',                    icon: Search,            href: '/agente-boliviano' },
+  { title: 'Merchant economy',   text: 'Tokens de comercio + marketplace',           icon: Store,             href: '/merchant-economy' },
+  { title: 'LATAM Protocol',     text: 'Expansión cripto-nativa a 5 países',         icon: Map,               href: '/latam-protocol' },
+  { title: 'Wellness coach',     text: 'Coach financiero IA gratis',                 icon: HeartPulse,        href: '/wellness-coach' },
 ];
 
 const northStar = [
