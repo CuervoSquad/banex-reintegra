@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Download, FileText, Loader2 } from 'lucide-react';
 import { reportService, formatPeriod, type MonthlyReport } from '../services/reportService';
 
 export default function ReportsPage() {
   const { sessionId } = useParams<{ sessionId?: string }>();
+  const generatedSessionRef = useRef<string | null>(null);
   const [reports, setReports] = useState<MonthlyReport[]>([]);
   const [selected, setSelected] = useState<MonthlyReport | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -16,7 +17,8 @@ export default function ReportsPage() {
   }, []);
 
   useEffect(() => {
-    if (sessionId && !generating) {
+    if (sessionId && generatedSessionRef.current !== sessionId) {
+      generatedSessionRef.current = sessionId;
       void handleGenerate(sessionId);
     }
   }, [sessionId]);
@@ -26,7 +28,10 @@ export default function ReportsPage() {
     setError(null);
     try {
       const report = await reportService.generate(sid);
-      setReports((prev) => [report, ...prev]);
+      setReports((prev) => {
+        const withoutDuplicate = prev.filter((item) => item.id !== report.id);
+        return [report, ...withoutDuplicate];
+      });
       setSelected(report);
     } catch (err: unknown) {
       setError((err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? 'Error al generar reporte');

@@ -1,13 +1,20 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.security import decode_token, is_blacklisted
 from app.api.routes import background_routes, auth_routes, cashback_routes, level_routes, upload_routes, report_routes, chat_routes
 
 PUBLIC_PATHS = {"/", "/health", "/api/docs", "/api/redoc", "/openapi.json"}
+# /api/v1/chat requiere auth — no está en PUBLIC_PREFIXES
 PUBLIC_PREFIXES = ("/api/v1/auth/",)
+
+# Rate limiter global
+limiter = Limiter(key_func=get_remote_address, default_limits=[settings.RATE_LIMIT_DEFAULT])
 
 app = FastAPI(
     title="BanexReintegra API",
@@ -15,15 +22,30 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/api/docs" if settings.DEBUG else None,
     redoc_url="/api/redoc" if settings.DEBUG else None,
+    openapi_url="/openapi.json" if settings.DEBUG else None,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS.split(","),
+    allow_origins=[o.strip() for o in settings.ALLOWED_ORIGINS.split(",")],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=[m.strip() for m in settings.ALLOWED_METHODS.split(",")],
+    allow_headers=[h.strip() for h in settings.ALLOWED_HEADERS.split(",")],
 )
+
+
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if settings.ENVIRONMENT == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+    return response
 
 
 @app.middleware("http")
@@ -57,7 +79,7 @@ async def auth_middleware(request: Request, call_next):
 
 @app.get("/", tags=["root"])
 def root():
-    return {"message": "BanexReintegra API funcionando correctamente"}
+    return {"message": "BanexReintegra API"}
 
 
 @app.get("/health", tags=["root"])

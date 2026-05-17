@@ -32,10 +32,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md rounded-lg border border-white/10 bg-[#161825] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
         <div className="mb-6 text-center">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#FF8C00]">
-            Banex STREAM
+            Banexcoin
           </p>
           <h1 className="text-2xl font-bold text-white">BanexReintegra</h1>
-          <p className="mt-1 text-sm text-[#85889E]">Ingresa con tu cuenta institucional</p>
+          <p className="mt-1 text-sm text-[#85889E]">Ingresa con tu correo electronico</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

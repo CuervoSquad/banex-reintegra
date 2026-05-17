@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, CheckCircle, FileSpreadsheet, Loader2, Upload, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Download, FileSpreadsheet, Loader2, Upload, XCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { uploadService, type UploadSession } from '../services/uploadService';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const CURRENT_YEAR = new Date().getFullYear();
+const SAMPLE_CSV = [
+  'user_identifier,amount_bs,amount_usdt,exchange_rate,merchant_name,transaction_date',
+  'user001,1000,100,10,Comercio A,2026-05-01',
+  'user002,2500,250,10,Comercio B,2026-05-02',
+].join('\n');
 
 export default function UploadPage() {
   const navigate = useNavigate();
@@ -26,6 +31,16 @@ export default function UploadPage() {
     e.preventDefault();
     const f = e.dataTransfer.files[0];
     if (f) setFile(f);
+  }
+
+  function downloadSample() {
+    const blob = new Blob([SAMPLE_CSV], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'ejemplo_transacciones_qr.csv';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -81,9 +96,31 @@ export default function UploadPage() {
               <input ref={inputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
             </div>
 
-            <p className="text-xs text-[#85889E]">
-              Columnas requeridas: <span className="text-white font-mono">user_identifier</span> (o usuario/cuenta) y <span className="text-white font-mono">amount_bs</span> (o monto_bs). Opcionales: <span className="text-white font-mono">amount_usdt</span>, <span className="text-white font-mono">exchange_rate</span>, comercio y fecha.
-            </p>
+            <div className="rounded-lg border border-[#FF8C00]/30 bg-[#FF8C00]/10 p-4 text-xs text-[#E7E8F1]">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="font-semibold text-white">Formato mínimo del archivo</p>
+                <button
+                  type="button"
+                  onClick={downloadSample}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#FF8C00]/40 px-3 py-2 text-[#FF8C00] transition hover:bg-[#FF8C00]/10"
+                >
+                  <Download className="h-4 w-4" /> CSV ejemplo
+                </button>
+              </div>
+              <div className="mt-3 space-y-2">
+                <p>Columnas obligatorias:</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="rounded-md bg-[#0E0F19] px-2 py-1 font-mono text-white">user_identifier</span>
+                  <span className="rounded-md bg-[#0E0F19] px-2 py-1 font-mono text-white">amount_bs</span>
+                </div>
+                <p className="text-[#85889E]">
+                  También se aceptan aliases: <span className="font-mono text-white">usuario</span> o <span className="font-mono text-white">cuenta</span> para usuario, y <span className="font-mono text-white">monto_bs</span>, <span className="font-mono text-white">consumo_bs</span> o <span className="font-mono text-white">consumo_total_bs</span> para el monto en bolivianos.
+                </p>
+                <p className="text-[#85889E]">
+                  Opcionales: <span className="font-mono text-white">amount_usdt</span>, <span className="font-mono text-white">exchange_rate</span>, <span className="font-mono text-white">merchant_name</span>, <span className="font-mono text-white">transaction_date</span>.
+                </p>
+              </div>
+            </div>
 
             {/* Período */}
             <div className="grid grid-cols-2 gap-3">
