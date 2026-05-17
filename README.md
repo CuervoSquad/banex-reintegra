@@ -285,26 +285,6 @@ transaction_date
 
 Tambien se aceptan alias como `usuario`, `cuenta`, `monto_bs`, `monto_usdt` o `crypto_quantity`.
 
-## Demo sugerida para pitch
-
-1. Mostrar login y dashboard.
-2. Entrar a configuracion de niveles.
-3. Explicar tabla de niveles.
-4. Crear un pago QR demo.
-5. Mostrar el cashback calculado.
-6. Mostrar el stream liberandose segundo a segundo.
-7. Aceptar cashback acumulado.
-8. Cargar archivo mensual de transacciones.
-9. Generar reporte de reintegros.
-10. Exportar archivo BanexTransfer.
-
-Mensaje clave:
-
-```txt
-BanexReintegra automatiza el ciclo completo: pago QR, nivel de fidelidad, calculo de cashback, liberacion en tiempo real, reporte operativo y pago masivo en USDT.
-```
-
-## Estado del proyecto
 
 Proyecto en desarrollo para demo y validacion de arquitectura. Antes de usar en produccion se recomienda:
 
