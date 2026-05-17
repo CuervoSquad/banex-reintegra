@@ -7,6 +7,7 @@ frontend/dist/
 # Backend Python
 venv/
 backend/venv/
+backend/.venv/
 __pycache__/
 *.pyc
 *.pyo
