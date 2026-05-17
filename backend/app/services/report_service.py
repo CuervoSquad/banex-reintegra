@@ -4,6 +4,7 @@ import uuid
 from decimal import Decimal, ROUND_HALF_UP
 
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.monthly_report import MonthlyReport, ReportRow
@@ -36,10 +37,7 @@ class ReportService:
             .first()
         )
         if existing_report:
-            existing_report.rows = (
-                self.db.query(ReportRow).filter(ReportRow.report_id == existing_report.id).all()
-            )
-            return MonthlyReportResponse.model_validate(existing_report)
+            return self._response_for_report(existing_report)
 
         amount_usdt_expr = func.coalesce(
             UploadRow.amount_usdt,
@@ -104,7 +102,18 @@ class ReportService:
             total_reintegro_bs=total_reintegro_bs.quantize(QUANT2),
         )
         self.db.add(report)
-        self.db.flush()
+        try:
+            self.db.flush()
+        except IntegrityError:
+            self.db.rollback()
+            existing_report = (
+                self.db.query(MonthlyReport)
+                .filter(MonthlyReport.session_id == session_id)
+                .first()
+            )
+            if existing_report:
+                return self._response_for_report(existing_report)
+            raise
 
         for r in report_rows:
             r.report_id = report.id
@@ -112,6 +121,12 @@ class ReportService:
         self.db.commit()
         self.db.refresh(report)
 
+        report.rows = (
+            self.db.query(ReportRow).filter(ReportRow.report_id == report.id).all()
+        )
+        return MonthlyReportResponse.model_validate(report)
+
+    def _response_for_report(self, report: MonthlyReport) -> MonthlyReportResponse:
         report.rows = (
             self.db.query(ReportRow).filter(ReportRow.report_id == report.id).all()
         )

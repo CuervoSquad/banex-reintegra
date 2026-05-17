@@ -2,12 +2,15 @@ import {
   ArrowUpRight,
   Bot,
   BriefcaseBusiness,
+  FileSpreadsheet,
   Flame,
   Gem,
   Globe2,
+  Layers3,
   LogOut,
   Map,
   MoreHorizontal,
+  ScrollText,
   Search,
   ShieldCheck,
   SlidersHorizontal,
@@ -57,6 +60,27 @@ const bets = [
   { title: 'Wellness coach',     text: 'Coach financiero IA gratis',                 icon: HeartPulse,        href: '/wellness-coach' },
 ];
 
+const operations = [
+  {
+    title: 'Cargar transacciones',
+    text: 'Subir CSV o Excel mensual de pagos QR',
+    icon: FileSpreadsheet,
+    href: '/upload',
+  },
+  {
+    title: 'Configurar niveles',
+    text: 'Editar rangos y porcentajes de reintegro',
+    icon: Layers3,
+    href: '/levels',
+  },
+  {
+    title: 'Reportes',
+    text: 'Generar y exportar archivos BanexTransfer',
+    icon: ScrollText,
+    href: '/reports',
+  },
+];
+
 const northStar = [
   { label: 'Usuarios activos', value: '1M+', note: 'vs ~10K hoy' },
   { label: 'Volumen QR/mes', value: '$100M+', note: 'multiplicador 100x' },
@@ -89,11 +113,34 @@ export default function DashboardPage() {
             <span className="sr-only">Más opciones</span>
           </button>
 
-          <h1 className="mt-4 text-3xl font-semibold tracking-wide text-white">BANEX OS</h1>
+          <h1 className="mt-4 text-3xl font-semibold tracking-wide text-white">BANEXCOIN</h1>
           <p className="mt-3 font-serif text-lg italic text-[#85889E]">
             De sistema de cashback a infraestructura cripto-financiera de LATAM
           </p>
         </header>
+
+        <section className="mt-8">
+          <h2 className="text-lg font-semibold text-white">Operación de reintegros</h2>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {operations.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.title}
+                  to={item.href}
+                  className="rounded-lg border border-white/10 bg-[#161825] p-4 transition hover:border-[#FF8C00] hover:bg-[#FF8C00]/10"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <Icon className="h-5 w-5 text-[#FF8C00]" />
+                    <ArrowUpRight className="h-4 w-4 text-[#85889E]" />
+                  </div>
+                  <h3 className="mt-3 text-base font-semibold text-white">{item.title}</h3>
+                  <p className="mt-1 text-sm leading-5 text-[#85889E]">{item.text}</p>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
 
         <section className="mt-8">
           <h2 className="text-lg font-semibold text-white">Tres caminos. Tres futuros.</h2>

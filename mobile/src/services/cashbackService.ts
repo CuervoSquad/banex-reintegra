@@ -1,4 +1,4 @@
-import api from './authService';
+import api from './api';
 
 export interface CashbackStream {
   id: string;
@@ -28,29 +28,17 @@ export interface QRPaymentCreate {
   chain_tx_hash?: string;
 }
 
-interface ClaimResponse {
-  stream: CashbackStream;
-  claimed_now: string;
-}
-
 export const cashbackService = {
   async current(): Promise<CashbackStream> {
     const { data } = await api.get<CashbackStream>('/cashback/streams/current');
     return data;
   },
-
-  async list(): Promise<CashbackStream[]> {
-    const { data } = await api.get<CashbackStream[]>('/cashback/streams');
-    return data;
-  },
-
   async createFromQrPayment(payload: QRPaymentCreate): Promise<CashbackStream> {
     const { data } = await api.post<CashbackStream>('/cashback/qr-payments', payload);
     return data;
   },
-
-  async claim(streamId: string): Promise<ClaimResponse> {
-    const { data } = await api.post<ClaimResponse>(`/cashback/streams/${streamId}/claim`);
+  async claim(streamId: string): Promise<{ stream: CashbackStream; claimed_now: string }> {
+    const { data } = await api.post(`/cashback/streams/${streamId}/claim`);
     return data;
   },
 };
