@@ -1,12 +1,12 @@
+import uuid
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
-from app.core.security import decode_token
+from app.core.security import decode_token, is_blacklisted
 from app.db.database import get_db
 from app.models.user import User
-
-import uuid
 
 bearer_scheme = HTTPBearer()
 
@@ -22,6 +22,10 @@ def get_current_user(
 
     if payload.get("type") != "access":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tipo de token incorrecto")
+
+    jti = payload.get("jti")
+    if jti and is_blacklisted(jti):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token revocado")
 
     user = db.query(User).filter(User.id == uuid.UUID(payload["sub"])).first()
     if not user or not user.is_active:

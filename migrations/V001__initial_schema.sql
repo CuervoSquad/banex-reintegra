@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS roles (
     updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_roles_name ON roles (name);
+CREATE INDEX IF NOT EXISTS idx_roles_name ON roles (name);
 
 -- =============================================================
 -- TABLA: users
@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_users_email    ON users (email);
-CREATE INDEX idx_users_username ON users (username);
-CREATE INDEX idx_users_role_id  ON users (role_id);
+CREATE INDEX IF NOT EXISTS idx_users_email    ON users (email);
+CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);
+CREATE INDEX IF NOT EXISTS idx_users_role_id  ON users (role_id);
 
 -- =============================================================
 -- TABLA: audit_logs
@@ -59,10 +59,10 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_audit_user_id   ON audit_logs (user_id);
-CREATE INDEX idx_audit_action    ON audit_logs (action);
-CREATE INDEX idx_audit_created   ON audit_logs (created_at DESC);
-CREATE INDEX idx_audit_entity    ON audit_logs (entity, entity_id);
+CREATE INDEX IF NOT EXISTS idx_audit_user_id   ON audit_logs (user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_action    ON audit_logs (action);
+CREATE INDEX IF NOT EXISTS idx_audit_created   ON audit_logs (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_entity    ON audit_logs (entity, entity_id);
 
 -- =============================================================
 -- TRIGGER: updated_at automático
@@ -75,10 +75,12 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trg_roles_updated_at ON roles;
 CREATE TRIGGER trg_roles_updated_at
     BEFORE UPDATE ON roles
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
 CREATE TRIGGER trg_users_updated_at
     BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();

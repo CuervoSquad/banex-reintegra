@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -7,6 +8,8 @@ from passlib.context import CryptContext
 from .config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+BLACKLIST_PREFIX = "blacklist:"
 
 
 def hash_password(plain_password: str) -> str:
@@ -18,12 +21,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(subject: str, role: str, extra: Optional[dict] = None) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": subject,
         "role": role,
+        "jti": str(uuid.uuid4()),
         "exp": expire,
-        "iat": datetime.now(timezone.utc),
+        "iat": now,
         "type": "access",
     }
     if extra:
@@ -32,11 +37,13 @@ def create_access_token(subject: str, role: str, extra: Optional[dict] = None) -
 
 
 def create_refresh_token(subject: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     payload = {
         "sub": subject,
+        "jti": str(uuid.uuid4()),
         "exp": expire,
-        "iat": datetime.now(timezone.utc),
+        "iat": now,
         "type": "refresh",
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -47,3 +54,15 @@ def decode_token(token: str) -> dict:
         return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     except JWTError as exc:
         raise ValueError("Token inválido o expirado") from exc
+
+
+def blacklist_token(jti: str, exp: int) -> None:
+    from app.db.redis_client import redis_client
+    ttl = exp - int(datetime.now(timezone.utc).timestamp())
+    if ttl > 0:
+        redis_client.setex(f"{BLACKLIST_PREFIX}{jti}", ttl, "1")
+
+
+def is_blacklisted(jti: str) -> bool:
+    from app.db.redis_client import redis_client
+    return redis_client.exists(f"{BLACKLIST_PREFIX}{jti}") == 1
