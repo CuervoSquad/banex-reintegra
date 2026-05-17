@@ -11,7 +11,7 @@ from app.models.user import User
 from app.schemas.upload import UploadSessionResponse
 
 REQUIRED_COLUMNS = {"user_identifier", "amount_bs"}
-OPTIONAL_COLUMNS = {"merchant_name", "exchange_rate", "transaction_date"}
+OPTIONAL_COLUMNS = {"merchant_name", "exchange_rate", "transaction_date", "amount_usdt"}
 
 COLUMN_ALIASES = {
     "usuario": "user_identifier",
@@ -21,6 +21,13 @@ COLUMN_ALIASES = {
     "monto_bs": "amount_bs",
     "monto": "amount_bs",
     "importe_bs": "amount_bs",
+    "consumo_bs": "amount_bs",
+    "amount_usd": "amount_usdt",
+    "amount_usdt": "amount_usdt",
+    "monto_usdt": "amount_usdt",
+    "importe_usdt": "amount_usdt",
+    "consumo_usdt": "amount_usdt",
+    "equivalente_usdt": "amount_usdt",
     "comercio": "merchant_name",
     "tipo_cambio": "exchange_rate",
     "tasa": "exchange_rate",
@@ -67,15 +74,20 @@ class UploadService:
             df = self._read_file(file_bytes, filename)
             df = self._normalize_columns(df)
             self._validate_columns(df)
-            rows = self._build_rows(df, session)
+            rows, validation_summary = self._build_rows(df, session)
+            if not rows:
+                raise ValueError("El archivo no contiene filas válidas para procesar")
 
             self.db.bulk_save_objects(rows)
             session.row_count = len(rows)
+            session.rejected_count = int(validation_summary["rejected_count"])
+            session.validation_summary = validation_summary
             session.status = "done"
             session.processed_at = datetime.now(timezone.utc)
         except Exception as exc:
             session.status = "error"
             session.error_message = str(exc)
+            session.validation_summary = session.validation_summary or {"errors": [str(exc)]}
 
         self.db.commit()
         self.db.refresh(session)
@@ -117,33 +129,111 @@ class UploadService:
                 f"El archivo debe contener: user_identifier (o usuario/cuenta), amount_bs (o monto_bs)"
             )
 
-    def _build_rows(self, df: pd.DataFrame, session: UploadSession) -> list[UploadRow]:
+    def _build_rows(self, df: pd.DataFrame, session: UploadSession) -> tuple[list[UploadRow], dict]:
         rows = []
-        for _, row in df.iterrows():
+        rejected: list[dict] = []
+        seen_keys: set[tuple] = set()
+        default_exchange = Decimal(session.exchange_rate)
+
+        for index, row in df.iterrows():
             amount = row.get("amount_bs")
             user_id = str(row.get("user_identifier", "")).strip()
             if not user_id or pd.isna(amount):
+                rejected.append({"row": int(index) + 2, "reason": "Usuario o monto Bs. vacío"})
                 continue
 
             try:
-                amount_decimal = Decimal(str(float(amount))).quantize(Decimal("0.01"))
+                amount_decimal = self._decimal_from_cell(amount, Decimal("0.01"))
                 if amount_decimal <= 0:
+                    rejected.append({"row": int(index) + 2, "reason": "Monto Bs. debe ser mayor a cero"})
                     continue
             except Exception:
+                rejected.append({"row": int(index) + 2, "reason": "Monto Bs. inválido"})
                 continue
 
             exchange = row.get("exchange_rate")
+            amount_usdt = row.get("amount_usdt")
             tx_date = row.get("transaction_date")
+            merchant_name = (
+                str(row["merchant_name"]).strip()
+                if "merchant_name" in df.columns and not pd.isna(row.get("merchant_name"))
+                else None
+            )
+
+            try:
+                exchange_decimal = (
+                    self._decimal_from_cell(exchange, Decimal("0.000001"))
+                    if exchange is not None and not pd.isna(exchange)
+                    else default_exchange
+                )
+                if exchange_decimal <= 0:
+                    raise ValueError
+            except Exception:
+                rejected.append({"row": int(index) + 2, "reason": "Tipo de cambio inválido"})
+                continue
+
+            try:
+                amount_usdt_decimal = (
+                    self._decimal_from_cell(amount_usdt, Decimal("0.000001"))
+                    if amount_usdt is not None and not pd.isna(amount_usdt)
+                    else (amount_decimal / exchange_decimal).quantize(Decimal("0.000001"))
+                )
+                if amount_usdt_decimal <= 0:
+                    raise ValueError
+            except Exception:
+                rejected.append({"row": int(index) + 2, "reason": "Monto USDT inválido"})
+                continue
+
+            try:
+                transaction_date = pd.to_datetime(tx_date).date() if tx_date is not None and not pd.isna(tx_date) else None
+            except Exception:
+                rejected.append({"row": int(index) + 2, "reason": "Fecha de transacción inválida"})
+                continue
+
+            dedupe_key = (user_id, str(amount_decimal), str(amount_usdt_decimal), str(transaction_date), merchant_name)
+            if dedupe_key in seen_keys:
+                rejected.append({"row": int(index) + 2, "reason": "Fila duplicada dentro del archivo"})
+                continue
+            seen_keys.add(dedupe_key)
 
             rows.append(
                 UploadRow(
                     session_id=session.id,
                     user_identifier=user_id,
-                    merchant_name=str(row["merchant_name"]) if "merchant_name" in df.columns and not pd.isna(row.get("merchant_name")) else None,
+                    merchant_name=merchant_name,
                     amount_bs=amount_decimal,
-                    exchange_rate=Decimal(str(float(exchange))).quantize(Decimal("0.000001")) if exchange is not None and not pd.isna(exchange) else None,
-                    transaction_date=pd.to_datetime(tx_date).date() if tx_date is not None and not pd.isna(tx_date) else None,
-                    raw_data=row.to_dict(),
+                    amount_usdt=amount_usdt_decimal,
+                    exchange_rate=exchange_decimal,
+                    transaction_date=transaction_date,
+                    raw_data=self._sanitize_raw_data(row.to_dict()),
                 )
             )
-        return rows
+
+        validation_summary = {
+            "input_rows": int(len(df)),
+            "accepted_count": int(len(rows)),
+            "rejected_count": int(len(rejected)),
+            "rejected_rows": rejected[:100],
+            "rejected_rows_truncated": len(rejected) > 100,
+            "columns": list(df.columns),
+        }
+        return rows, validation_summary
+
+    def _decimal_from_cell(self, value, quant: Decimal) -> Decimal:
+        if isinstance(value, Decimal):
+            return value.quantize(quant)
+        text = str(value).strip().replace(",", ".")
+        return Decimal(text).quantize(quant)
+
+    def _sanitize_raw_data(self, raw: dict) -> dict:
+        clean = {}
+        for key, value in raw.items():
+            if pd.isna(value):
+                clean[key] = None
+            elif hasattr(value, "isoformat"):
+                clean[key] = value.isoformat()
+            elif hasattr(value, "item"):
+                clean[key] = value.item()
+            else:
+                clean[key] = value
+        return clean

@@ -18,6 +18,8 @@ class UploadSessionResponse(BaseModel):
     exchange_rate: Decimal
     status: str
     row_count: int | None
+    rejected_count: int = 0
+    validation_summary: dict | None = None
     error_message: str | None
     processed_at: datetime | None
     created_at: datetime
@@ -30,6 +32,7 @@ class UploadRowResponse(BaseModel):
     user_identifier: str
     merchant_name: str | None
     amount_bs: Decimal
+    amount_usdt: Decimal | None
     exchange_rate: Decimal | None
     transaction_date: str | None
 

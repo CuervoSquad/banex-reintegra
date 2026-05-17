@@ -8,6 +8,16 @@ export type UploadSession = {
   exchange_rate: string;
   status: 'pending' | 'processing' | 'done' | 'error';
   row_count: number | null;
+  rejected_count: number;
+  validation_summary: {
+    input_rows?: number;
+    accepted_count?: number;
+    rejected_count?: number;
+    rejected_rows?: Array<{ row: number; reason: string }>;
+    rejected_rows_truncated?: boolean;
+    columns?: string[];
+    errors?: string[];
+  } | null;
   error_message: string | null;
   processed_at: string | null;
   created_at: string;

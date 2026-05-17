@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Download, FileText, Loader2, Table2 } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Download, FileText, Loader2 } from 'lucide-react';
 import { reportService, formatPeriod, type MonthlyReport } from '../services/reportService';
 
 export default function ReportsPage() {
   const { sessionId } = useParams<{ sessionId?: string }>();
-  const navigate = useNavigate();
   const [reports, setReports] = useState<MonthlyReport[]>([]);
   const [selected, setSelected] = useState<MonthlyReport | null>(null);
   const [generating, setGenerating] = useState(false);

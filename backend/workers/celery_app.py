@@ -7,6 +7,7 @@ celery_app = Celery(
     "banex_workers",
     broker=REDIS_URL,
     backend=REDIS_URL.replace("/0", "/1"),
+    include=["workers.celery_tasks"],
 )
 
 celery_app.conf.update(task_track_started=True)

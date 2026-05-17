@@ -3,6 +3,7 @@ import io
 import uuid
 from decimal import Decimal, ROUND_HALF_UP
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.monthly_report import MonthlyReport, ReportRow
@@ -29,14 +30,31 @@ class ReportService:
         if session.status != "done":
             raise ValueError("La sesión debe estar en estado 'done' para generar un reporte")
 
-        rows: list[UploadRow] = (
-            self.db.query(UploadRow).filter(UploadRow.session_id == session_id).all()
+        existing_report = (
+            self.db.query(MonthlyReport)
+            .filter(MonthlyReport.session_id == session_id)
+            .first()
         )
+        if existing_report:
+            existing_report.rows = (
+                self.db.query(ReportRow).filter(ReportRow.report_id == existing_report.id).all()
+            )
+            return MonthlyReportResponse.model_validate(existing_report)
 
-        # Agregar por usuario
-        totals: dict[str, Decimal] = {}
-        for row in rows:
-            totals[row.user_identifier] = totals.get(row.user_identifier, Decimal("0")) + Decimal(row.amount_bs)
+        amount_usdt_expr = func.coalesce(
+            UploadRow.amount_usdt,
+            UploadRow.amount_bs / func.coalesce(UploadRow.exchange_rate, session.exchange_rate),
+        )
+        totals = (
+            self.db.query(
+                UploadRow.user_identifier,
+                func.sum(UploadRow.amount_bs).label("total_amount_bs"),
+                func.sum(amount_usdt_expr).label("total_amount_usdt"),
+            )
+            .filter(UploadRow.session_id == session_id)
+            .group_by(UploadRow.user_identifier)
+            .all()
+        )
 
         exchange_rate = Decimal(session.exchange_rate)
         report_rows = []
@@ -44,12 +62,18 @@ class ReportService:
         total_reintegro_bs = Decimal("0")
         total_amount_bs = Decimal("0")
 
-        for user_id, amount_bs in totals.items():
+        for user_id, amount_bs_raw, amount_usdt_raw in totals:
+            amount_bs = Decimal(amount_bs_raw).quantize(QUANT2, rounding=ROUND_HALF_UP)
+            amount_usdt = Decimal(amount_usdt_raw).quantize(QUANT6, rounding=ROUND_HALF_UP)
+            effective_exchange_rate = (
+                (amount_bs / amount_usdt).quantize(QUANT6, rounding=ROUND_HALF_UP)
+                if amount_usdt > 0
+                else exchange_rate
+            )
             level = self._levels.find_for_amount(amount_bs)
             percentage = Decimal(level.percentage) if level else Decimal("0")
             reintegro_bs = (amount_bs * percentage).quantize(QUANT2, rounding=ROUND_HALF_UP)
-            reintegro_usdt = (reintegro_bs / exchange_rate).quantize(QUANT6, rounding=ROUND_HALF_UP)
-            amount_usdt = (amount_bs / exchange_rate).quantize(QUANT6, rounding=ROUND_HALF_UP)
+            reintegro_usdt = (reintegro_bs / effective_exchange_rate).quantize(QUANT6, rounding=ROUND_HALF_UP)
 
             report_rows.append(
                 ReportRow(
@@ -61,7 +85,7 @@ class ReportService:
                     level_percentage=percentage if level else None,
                     reintegro_usdt=reintegro_usdt,
                     reintegro_bs=reintegro_bs,
-                    exchange_rate=exchange_rate,
+                    exchange_rate=effective_exchange_rate,
                 )
             )
             total_reintegro_usdt += reintegro_usdt

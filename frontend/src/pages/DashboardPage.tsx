@@ -183,24 +183,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-function ActionButton({ label, href }: { label: string; href?: string }) {
-  const className =
-    'inline-flex items-center justify-between rounded-lg border border-white/10 bg-[#161825] px-4 py-3 text-sm font-medium text-white transition hover:border-[#5346F6]';
-
-  if (href) {
-    return (
-      <Link to={href} className={className}>
-        {label}
-        <ArrowUpRight className="h-4 w-4" />
-      </Link>
-    );
-  }
-
-  return (
-    <button type="button" className={className}>
-      {label}
-      <ArrowUpRight className="h-4 w-4" />
-    </button>
-  );
-}

@@ -82,7 +82,7 @@ export default function UploadPage() {
             </div>
 
             <p className="text-xs text-[#85889E]">
-              Columnas requeridas: <span className="text-white font-mono">user_identifier</span> (o usuario/cuenta) y <span className="text-white font-mono">amount_bs</span> (o monto_bs)
+              Columnas requeridas: <span className="text-white font-mono">user_identifier</span> (o usuario/cuenta) y <span className="text-white font-mono">amount_bs</span> (o monto_bs). Opcionales: <span className="text-white font-mono">amount_usdt</span>, <span className="text-white font-mono">exchange_rate</span>, comercio y fecha.
             </p>
 
             {/* Período */}
@@ -128,6 +128,10 @@ export default function UploadPage() {
               </div>
             )}
 
+            {result?.validation_summary && (
+              <ValidationSummary session={result} />
+            )}
+
             <button type="submit" disabled={!file || loading} className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#FF8C00] px-4 py-3 text-sm font-bold text-[#0E0F19] transition hover:bg-[#F38118] disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Procesando...</> : <><Upload className="h-4 w-4" /> Cargar archivo</>}
             </button>
@@ -147,7 +151,7 @@ export default function UploadPage() {
                       <StatusBadge status={s.status} />
                     </div>
                     <p className="mt-1 text-xs text-[#85889E]">
-                      {MONTHS[s.period_month - 1]} {s.period_year} · {s.row_count ?? '—'} filas
+                      {MONTHS[s.period_month - 1]} {s.period_year} · {s.row_count ?? '—'} ok · {s.rejected_count ?? 0} rechazadas
                     </p>
                     {s.status === 'done' && (
                       <Link to={`/reports/generate/${s.id}`} className="mt-2 inline-block text-xs text-[#FF8C00] hover:underline">
@@ -161,6 +165,38 @@ export default function UploadPage() {
           </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+function ValidationSummary({ session }: { session: UploadSession }) {
+  const rejectedRows = session.validation_summary?.rejected_rows ?? [];
+  if (!session.validation_summary) return null;
+
+  return (
+    <div className="rounded-lg border border-white/10 bg-[#0E0F19] px-4 py-3 text-xs text-[#85889E]">
+      <div className="grid grid-cols-3 gap-3 text-center">
+        <div>
+          <p className="text-white font-semibold">{session.validation_summary.input_rows ?? '—'}</p>
+          <p>Leídas</p>
+        </div>
+        <div>
+          <p className="text-green-300 font-semibold">{session.validation_summary.accepted_count ?? session.row_count ?? '—'}</p>
+          <p>Aceptadas</p>
+        </div>
+        <div>
+          <p className="text-red-300 font-semibold">{session.validation_summary.rejected_count ?? session.rejected_count ?? 0}</p>
+          <p>Rechazadas</p>
+        </div>
+      </div>
+      {rejectedRows.length > 0 && (
+        <div className="mt-3 max-h-28 overflow-auto rounded-md bg-red-500/10 p-2 text-red-100">
+          {rejectedRows.slice(0, 6).map((row) => (
+            <p key={`${row.row}-${row.reason}`}>Fila {row.row}: {row.reason}</p>
+          ))}
+          {session.validation_summary.rejected_rows_truncated && <p>Hay más filas rechazadas en el resumen del backend.</p>}
+        </div>
+      )}
     </div>
   );
 }
