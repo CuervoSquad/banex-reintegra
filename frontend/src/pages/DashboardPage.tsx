@@ -7,17 +7,13 @@ import {
   Globe2,
   LogOut,
   Map,
-  MessageCircle,
-  Mic,
   MoreHorizontal,
-  Plus,
   Search,
   ShieldCheck,
   SlidersHorizontal,
   Split,
   Store,
   SunMedium,
-  Waves,
   HeartPulse,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -183,40 +179,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="mt-8 rounded-lg border border-white/10 bg-[#161825] px-6 py-6">
-          <p className="font-serif text-xl font-semibold italic text-white">
-            "El cashback no es el producto. Es el caballo de Troya."
-          </p>
-          <p className="mt-4 text-sm leading-6 text-[#85889E]">
-            La pregunta para Banexcoin no es si esto va a ocurrir en LATAM. Es{' '}
-            <span className="font-semibold text-white">quién lo va a hacer.</span> Tienes 24-36
-            meses de ventana regulatoria.
-          </p>
-        </section>
-
-
       </main>
-
-      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[760px] px-4 pb-4 sm:px-6">
-        <div className="rounded-t-3xl border border-white/10 bg-[#161825]/95 px-5 py-4 shadow-[0_-18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
-          <div className="text-base text-[#85889E]">Escribe un mensaje...</div>
-          <div className="mt-5 flex items-center justify-between">
-            <button
-              type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[#85889E] transition hover:bg-white/10"
-            >
-              <Plus className="h-5 w-5" />
-              <span className="sr-only">Agregar</span>
-            </button>
-            <div className="flex items-center gap-3 text-sm text-[#85889E]">
-              <span>Opus 4.7 Adaptativo</span>
-              <Waves className="h-4 w-4 text-[#FF8C00]" />
-              <Mic className="h-5 w-5" />
-              <MessageCircle className="h-5 w-5" />
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
