@@ -7,7 +7,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.security import decode_token, is_blacklisted
-from app.api.routes import background_routes, auth_routes, cashback_routes, level_routes, upload_routes, report_routes, chat_routes
+from app.api.routes import background_routes, auth_routes, cashback_routes, level_routes, upload_routes, report_routes, chat_routes, score_routes
 
 PUBLIC_PATHS = {"/", "/health", "/api/docs", "/api/redoc", "/openapi.json"}
 # /api/v1/chat requiere auth — no está en PUBLIC_PREFIXES
@@ -94,3 +94,4 @@ app.include_router(upload_routes.router, prefix="/api/v1")
 app.include_router(report_routes.router, prefix="/api/v1")
 app.include_router(background_routes.router, prefix="/api/v1/background", tags=["background"])
 app.include_router(chat_routes.router, prefix="/api/v1")
+app.include_router(score_routes.router, prefix="/api/v1")
