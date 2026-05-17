@@ -1,0 +1,110 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: banex_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-banex_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-banex_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-banex_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-banex_user} -d ${POSTGRES_DB:-banex_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: banex_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    container_name: banex_logstash
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    volumes:
+      - ./docker/logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ./docker/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: banex_backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker_celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: banex_worker_celery
+    command: celery -A workers.celery_app.celery_app worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker_rq:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: banex_worker_rq
+    command: python -m workers.rq_worker
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  flyway:
+    image: flyway/flyway:10-alpine
+    container_name: banex_flyway
+    command: migrate
+    volumes:
+      - ./migrations:/flyway/sql
+      - ./docker/flyway/flyway.conf:/flyway/conf/flyway.conf:ro
+    restart: "no"
+
+volumes:
+  db_data:

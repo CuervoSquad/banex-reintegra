@@ -1,0 +1,29 @@
+# Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# Backend Python
+venv/
+backend/venv/
+backend/.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Env
+.env
+frontend/.env
+backend/.env
+
+# Editor / virtualenv
+frontend/.venv/
+
+# Archivos cargados/exportados
+backend/uploads/
+backend/exports/
+
+# Sistema
+.DS_Store
+Thumbs.db
