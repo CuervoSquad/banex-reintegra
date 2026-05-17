@@ -39,6 +39,11 @@ export const cashbackService = {
     return data;
   },
 
+  async list(): Promise<CashbackStream[]> {
+    const { data } = await api.get<CashbackStream[]>('/cashback/streams');
+    return data;
+  },
+
   async createFromQrPayment(payload: QRPaymentCreate): Promise<CashbackStream> {
     const { data } = await api.post<CashbackStream>('/cashback/qr-payments', payload);
     return data;

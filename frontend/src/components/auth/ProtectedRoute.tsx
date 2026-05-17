@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ChatWidget from '../ChatWidget';
+import MonthlyConsumptionWidget from '../MonthlyConsumptionWidget';
 
 export function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -18,6 +19,7 @@ export function ProtectedRoute() {
   return (
     <>
       <Outlet />
+      <MonthlyConsumptionWidget />
       <ChatWidget />
     </>
   );
