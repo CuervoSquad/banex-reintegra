@@ -40,7 +40,7 @@ const paths = [
   {
     label: 'Camino C',
     title: 'Audaz',
-    text: 'BANEX OS - infraestructura LATAM',
+    text: 'BANEXCOIN - infraestructura LATAM',
     revenue: '$50M+',
     icon: Flame,
     selected: true,

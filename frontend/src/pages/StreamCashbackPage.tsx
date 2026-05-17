@@ -34,7 +34,7 @@ export default function StreamCashbackPage() {
             className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#161825] px-3 py-2 text-sm text-[#85889E] transition hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
-            BANEX OS
+            BANEXCOIN
           </Link>
           <div className="flex items-center gap-2 rounded-lg bg-[#FF8C00]/10 px-3 py-2 text-sm font-semibold text-[#FF8C00]">
             <Radio className="h-4 w-4" />

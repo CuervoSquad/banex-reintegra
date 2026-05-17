@@ -41,7 +41,7 @@ export default function WellnessPage() {
           </div>
           <div>
             <h1 className="text-2xl font-semibold">Wellness Coach</h1>
-            <p className="text-sm text-[#85889E]">Tu coach financiero IA personal, gratis con BANEX OS</p>
+            <p className="text-sm text-[#85889E]">Tu coach financiero IA personal, gratis con BANEXCOIN</p>
           </div>
         </header>
 

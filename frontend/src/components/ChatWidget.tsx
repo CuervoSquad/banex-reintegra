@@ -67,7 +67,7 @@ export default function ChatWidget() {
           <div className="flex max-h-[380px] min-h-[200px] flex-col gap-3 overflow-y-auto p-4">
             {messages.length === 0 && (
               <p className="text-center text-xs text-[#85889E]">
-                Pregúntame sobre cashback, reintegros o la estrategia BANEX OS.
+                Pregúntame sobre cashback, reintegros o la estrategia BANEXCOIN.
               </p>
             )}
             {messages.map((m, i) => (

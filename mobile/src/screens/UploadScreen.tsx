@@ -20,7 +20,7 @@ export default function UploadScreen() {
   return (
     <ScrollView style={s.scroll} contentContainerStyle={s.container}>
       <View style={s.headerRow}>
-        <TouchableOpacity style={s.backBtn} onPress={() => nav.goBack()}><Text style={s.backText}>← BANEX OS</Text></TouchableOpacity>
+        <TouchableOpacity style={s.backBtn} onPress={() => nav.goBack()}><Text style={s.backText}>← BANEXCOIN</Text></TouchableOpacity>
         <Text style={s.title}>Carga de transacciones</Text>
       </View>
 
